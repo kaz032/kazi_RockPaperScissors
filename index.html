@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rock Paper Scissors</title>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #e6e6fa; /* off-white background color */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+
+  .container {
+    text-align: center;
+  }
+.choices {
+  position: absolute;
+  left: 300px; /* Adjust this value for the desired distance from the left */
+  top: 55%; /* Center vertically */
+  transform: translateY(-50%);
+}
+
+
+  .choices img {
+    width: 100px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out;
+    display: block;
+  }
+
+  .choices img:hover {
+    transform: scale(1.1);
+  }
+
+  .result {
+    margin-top: 50px;
+  }
+
+  .result div {
+    display: inline-block;
+    margin: 20px;
+  }
+
+  .result h2 {
+    margin-bottom: 10px;
+  }
+
+  .result img {
+    width: 100px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  #score {
+    margin-top: 20px;
+    font-size: 24px;
+  }
+
+  #rounds {
+    margin-bottom: 20px;
+  }
+
+  #rounds button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    background-color: #7a7aff;
+    color: white;
+    transition: background-color 0.2s ease;
+  }
+
+  #rounds button:hover {
+    background-color: #4000bf;
+  }
+
+  #rounds button:not(:last-child) {
+    margin-right: 10px;
+  }
+  #outcome {
+    margin-top: 20px;
+    font-size: 24px;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 10px;
+  }
+
+  .win {
+    background-color: lightgreen;
+  }
+
+  .lose {
+    background-color: #ffcccc;
+  }
+
+  .tie {
+    background-color: #ffff99;
+  }
+#resetButton,
+#homeButton,
+#quitButton {
+  margin: 10px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  transition: background-color 0.2s ease;
+}
+
+#resetButton:hover{
+  background-color: #f0a800;
+}
+#homeButton:hover {
+  background-color: #45a049;
+}
+
+#quitButton {
+  background-color: #ff3333; /* Red color for quit button */
+  color: white;
+}
+
+#quitButton:hover {
+  background-color: #cc0000; /* Darker red on hover */
+}
+
+#playContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  transition: background-color 0.5s ease;
+}
+
+#playButton button {
+  font-size: 32px;
+  padding: 20px 40px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  background-color: #4CAF50;
+  color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#playButton button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+
+
+</style>
+</head>
+<body>
+
+
+
+<div style="position: absolute; top: 0; left: 0; padding: 20px; display: flex; justify-content: space-between; width: 100%;">
+    <div>
+        <button id="homeButton">Home</button>
+        <button id="resetButton">Reset</button>
+    </div>
+    <div style="margin-right: 30px;">
+        <button id="quitButton">Quit</button>
+    </div>
+</div>
+
+
+
+<div class="container">
+  
+  <div id="scoreSection" style="display: none;">
+    <div id="score"> Score:</div>
+  </div>
+  <div id="outcome"></div>
+  <div id="rounds">
+    <h1>🗿ROCK🗿   📜PAPER📜   ✂️SCISSORS✂️ </h1>	
+    <h2> Choose a game mode </h2>
+    <button onclick="setRounds(3)">Best of 3</button>
+    <button onclick="setRounds(5)">Best of 5</button>
+    <button onclick="setRounds(Infinity)">Endless</button>
+  </div>
+      
+  <div id="computerChoiceSection" class="result" style="display: none;"> <!-- Modified: Added ID and initially hidden -->
+  <h2>Computer's Choice:</h2>
+  <div id="computerChoice"></div>
+</div>
+<div id="userChoiceSection" class="result" style="display: none;"> <!-- Modified: Added ID and initially hidden -->
+  <h2>User's Choice:</h2>
+  <div id="userChoice"></div>
+</div>
+
+  <div class="choices" style="display: none;">
+    <h2> Your Pick !</h2>
+    <img src="rock.jpg" alt="Rock" onclick="play('rock')">
+    <img src="paper.jpg" alt="Paper" onclick="play('paper')">
+    <img src="scissors.jpg" alt="Scissors" onclick="play('scissors')">
+  </div>
+</div>
+
+<script>
+var userScore = 0;
+var computerScore = 0;
+var totalRounds = 0;
+var userChoice = '';
+
+function setRounds(rounds) {
+  totalRounds = rounds;
+  document.querySelector('.choices').style.display = 'block'; // show choices when rounds are selected
+  document.getElementById('rounds').style.display = 'none'; // hide the rounds buttons
+  
+  // Show computer and user choice sections
+  document.getElementById('scoreSection').style.display = 'block';
+  document.getElementById('computerChoiceSection').style.display = 'block';
+  document.getElementById('userChoiceSection').style.display = 'block';
+
+  // Add event listeners for new buttons
+  document.getElementById('homeButton').addEventListener('click', goHome);
+  document.getElementById('resetButton').addEventListener('click', resetScore);
+  document.getElementById('quitButton').addEventListener('click', quit);
+}
+
+// Function to reset only the score
+function resetScore() {
+  userScore = 0;
+  computerScore = 0;
+  document.getElementById('score').innerHTML = 'Score: User - 0, Computer - 0';
+  document.getElementById('userChoice').innerHTML = '';
+  document.getElementById('computerChoice').innerHTML = '';
+  document.getElementById('outcome').textContent = '';
+  removeOutcomeClass();
+}
+
+// Function to go back to game mode selection
+function goHome() {
+  document.querySelector('.choices').style.display = 'none';
+  resetScore();
+  document.getElementById('outcome').textContent = '';
+  document.getElementById('rounds').style.display = 'block';
+  document.getElementById('userChoice').innerHTML = '';
+  document.getElementById('computerChoice').innerHTML = '';
+
+  // Hide computer and user choice sections
+  document.getElementById('scoreSection').style.display = 'none';
+  document.getElementById('computerChoiceSection').style.display = 'none';
+  document.getElementById('userChoiceSection').style.display = 'none';
+  removeOutcomeClass();
+}
+
+
+function quit() {
+    goHome();
+  removeOutcomeClass();
+ 
+}
+
+function showGameModes() {
+  document.getElementById('playContainer').style.backgroundColor = 'transparent'; // Make background transparent
+  document.getElementById('welcomeText').style.display = 'none'; // Hide the welcome text
+  document.getElementById('playButton').style.display = 'none'; // Hide the play button
+  document.getElementById('gameModes').style.display = 'block'; // Show the game mode choices
+}
+
+function play(playerChoice) {
+  if (totalRounds === 0) {
+    alert('Please select the number of rounds first.');
+    return;
+  }
+
+  userChoice = playerChoice;
+  
+  var choices = ['rock', 'paper', 'scissors'];
+  var computerChoice = choices[Math.floor(Math.random() * choices.length)];
+  document.getElementById('userChoice').innerHTML = '';
+  document.getElementById('userChoice').innerHTML = '<img src="' + playerChoice + '.jpg" alt="' + playerChoice + '">';
+
+  setTimeout(function() {
+    document.getElementById('computerChoice').innerHTML = '<img src="' + computerChoice + '.jpg" alt="' + computerChoice + '">';
+
+    var outcome = '';
+    
+    if (playerChoice === computerChoice) {
+      outcome = "It's a tie!";
+    } else if (
+      (playerChoice === 'rock' && computerChoice === 'scissors') ||
+      (playerChoice === 'paper' && computerChoice === 'rock') ||
+      (playerChoice === 'scissors' && computerChoice === 'paper')
+    ) {
+      outcome = 'You win!';
+      userScore++;
+    } else {
+      outcome = 'You lose!';
+      computerScore++;
+    }
+
+    document.getElementById('outcome').innerHTML = outcome;
+    document.getElementById('outcome').className = outcome === "You win!" ? "win" : (outcome === "You lose!" ? "lose" : "tie");
+    document.getElementById('score').innerHTML = 'Score: User - ' + userScore + ', Computer - ' + computerScore;
+
+    if (userScore === totalRounds || computerScore === totalRounds) {
+      setTimeout(function() {
+        if (userScore === totalRounds) {
+          alert('Congratulations! You won the game!');
+        } else {
+          alert('Oops! You lost the game!');
+        }
+	quit();
+        resetGame();
+      }, 1000); // 1 second delay before alerting
+    } else {
+      setTimeout(function() {
+        document.querySelector('.choices').style.display = 'block'; // show choices after score is registered
+        document.getElementById('userChoice').innerHTML = ''; 
+        document.getElementById('computerChoice').innerHTML = '';
+      }, 1100); // 1 second delay
+
+    }
+   
+  }, 250); // 1 second delay for smooth transition
+}
+
+function resetGame() {
+  userScore = 0;
+  computerScore = 0;
+  totalRounds = 0;
+  userChoice = '';
+  document.getElementById('userChoice').innerHTML = '';
+  document.getElementById('computerChoice').innerHTML = '';
+  document.getElementById('outcome').textContent = '';
+  document.getElementById('score').innerHTML = 'Score: User - 0, Computer - 0';
+  document.getElementById('rounds').style.display = 'block'; // show rounds buttons
+}
+
+function removeOutcomeClass() {
+  document.getElementById('outcome').classList.remove('win', 'lose', 'tie');
+}
+
+</script>
+</body>
+</html>
